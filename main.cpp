@@ -1,4 +1,4 @@
-  /*
+   /*
     COPYRIGHT (C) 2017 Joseph Cochran (jmc361) All rights reserved.
     Project Part A
     Author. Joseph Cochran
@@ -50,10 +50,10 @@ public:
         //Listnode::next = nullptr;
     }
     ~myListLab();
-    void insertNode(Lab, int);
+    void insertNode(Lab, int, int);
     void deleteNode(Lab);
     void appendNode(Lab&);
-    friend void login(myListLab array[], int);
+    friend void login(myListLab array[]);
     friend void display(myListLab array[]);
     //void display(myLab* arr[]);
     friend void logout(myListLab array[]);
@@ -62,6 +62,7 @@ public:
     {
         Lab object;
         int station;
+        int lab;
         int count;
         struct Listnode *next;
     };
@@ -74,13 +75,13 @@ bool CheckStation(myListLab [], int , int );
 void menu();
 
 int getlabnum(myListLab [], int);
-int getStationNum(int, myListLab [], int);
+int getStationNum(int, myListLab []);
 string getName();
 int getTime();
 void putInArray (Lab **, Lab &, int, int);
 void search(Lab **);
 void display(Lab **);
-void logout(Lab **);
+//void logout(Lab **);
 int getID();
 Lab startup(Lab **);
 int choicee();
@@ -115,18 +116,20 @@ int main()
         int choice = choicee();
         if (choice == 1)
         {
-            login(universityLabs,capacity);
+            login(universityLabs);
             ++capacity;
             repeat = false;
         }
         else if (choice == 2)
         {
+            logout(universityLabs);
             //Logs out user
            // logout(ptr);
             repeat = false;
         }
         else if (choice == 3)
         {
+            searchArray(universityLabs);
             //Searchs for user
            // search(ptr);
             repeat = false;
@@ -211,9 +214,13 @@ void menu()
 //Function to check if lab is full
 //precond: Takes in Lab double pointer and int
 //postcond: returns true or false whether lab is full
-bool checkLab(myListLab ary[], int labChoice, int capacity)
+bool checkLab(myListLab ary[], int labChoice)
 {
-    if(capacity < LABSIZES[labChoice-1])
+    if(!ary[labChoice-1].size)
+    {
+        return false;
+    }
+    if(ary[labChoice-1].size < LABSIZES[labChoice-1])
     {
         return false;
     }
@@ -239,7 +246,7 @@ bool checkLab(myListLab ary[], int labChoice, int capacity)
 //Function to check if station is full
 //precond: Takes in double pointer, int lab, and int station
 //postcond: returns true or false depending on if full
-bool CheckStation(myListLab ary[], int labChoice, int Station, int capacity)
+bool CheckStation(myListLab ary[], int labChoice, int Station)
 {
     int count = -1;
     int ID;
@@ -253,7 +260,7 @@ bool CheckStation(myListLab ary[], int labChoice, int Station, int capacity)
         return false;
     }
 
-    while (count != capacity-1)
+    while (count != ary[labChoice-1].size -1)
     {
         if (nodePtr->station == Station)
         {
@@ -271,6 +278,7 @@ bool CheckStation(myListLab ary[], int labChoice, int Station, int capacity)
     }
     tailNode = nodePtr;
     nodePtr = ary[labChoice-1].head;
+    return false;
 }
 
 //Function to get random id of user
@@ -280,13 +288,13 @@ int getID()
 {
     std::srand(std::time(NULL));
     int ID = (std::rand() % 99998) + 1;
-    cout << endl << endl << "User ID: " << ID << endl;
+    cout << endl << endl << "User Id: " << std::setw(5) << std::setfill('0') << ID << std::setfill(' ') << endl;
     return ID;
 }
 //Function to get lab number from user
 //precond: Takes in Lab double pointer to navigate and store lab number
 //postcond: returns int lab choice
-int getlabnum(myListLab obj[], int capacity)
+int getlabnum(myListLab obj[])
 {
     bool repeat = true;
     int labChoice;
@@ -307,7 +315,7 @@ int getlabnum(myListLab obj[], int capacity)
         else
         {
             //Checks if lab is full
-            bool ifFull = checkLab(obj, labChoice, capacity);
+            bool ifFull = checkLab(obj, labChoice);
             if (ifFull == true)
             {
                 cin.clear();
@@ -326,7 +334,7 @@ int getlabnum(myListLab obj[], int capacity)
 //Function to get station number from user
 //precond: takes in int lab choice and Lab double pointer to navigate and store station
 //postcond: returns int for station
-int getStationNum(int labChoice, myListLab obj[], int capacity)
+int getStationNum(int labChoice, myListLab obj[])
 {
     bool repeat = true;
     int stationNum;
@@ -348,7 +356,7 @@ int getStationNum(int labChoice, myListLab obj[], int capacity)
             else
             {
                 //Checks if station is full
-                bool isFull = CheckStation(obj, labChoice, stationNum, capacity);
+                bool isFull = CheckStation(obj, labChoice, stationNum);
                 if (isFull == true)
                 {
                     cin.clear();
@@ -380,7 +388,7 @@ int getStationNum(int labChoice, myListLab obj[], int capacity)
             else
             {
                 //Checks if station is full
-                bool isFull = CheckStation(obj, labChoice, stationNum, capacity);
+                bool isFull = CheckStation(obj, labChoice, stationNum);
                 if (isFull == true)
                 {
                     cin.clear();
@@ -411,7 +419,7 @@ int getStationNum(int labChoice, myListLab obj[], int capacity)
             else
             {
                 //checks if station is full
-                bool isFull = CheckStation(obj, labChoice, stationNum, capacity);
+                bool isFull = CheckStation(obj, labChoice, stationNum);
                 if (isFull == true)
                 {
                     cin.clear();
@@ -442,7 +450,7 @@ int getStationNum(int labChoice, myListLab obj[], int capacity)
             else
             {
                 //checks if station is full
-                bool isFull = CheckStation(obj, labChoice, stationNum, capacity);
+                bool isFull = CheckStation(obj, labChoice, stationNum);
                 if (isFull == true)
                 {
                     cin.clear();
@@ -473,7 +481,7 @@ int getStationNum(int labChoice, myListLab obj[], int capacity)
             else
             {
                 //checks if station is full
-                bool isFull = CheckStation(obj, labChoice, stationNum, capacity);
+                bool isFull = CheckStation(obj, labChoice, stationNum);
                 if (isFull == true)
                 {
                     cin.clear();
@@ -504,7 +512,7 @@ int getStationNum(int labChoice, myListLab obj[], int capacity)
             else
             {
                 //checks if station is full
-                bool isFull = CheckStation(obj, labChoice, stationNum, capacity);
+                bool isFull = CheckStation(obj, labChoice, stationNum);
                 if (isFull == true)
                 {
                     cin.clear();
@@ -535,7 +543,7 @@ int getStationNum(int labChoice, myListLab obj[], int capacity)
             else
             {
                 //checks if station is full
-                bool isFull = CheckStation(obj, labChoice, stationNum, capacity);
+                bool isFull = CheckStation(obj, labChoice, stationNum);
                 if (isFull == true)
                 {
                     cin.clear();
@@ -566,7 +574,7 @@ int getStationNum(int labChoice, myListLab obj[], int capacity)
             else
             {
                 //checks if station is full
-                bool isFull = CheckStation(obj, labChoice, stationNum, capacity);
+                bool isFull = CheckStation(obj, labChoice, stationNum);
                 if (isFull == true)
                 {
                     cin.clear();
@@ -863,7 +871,7 @@ bool Lab::operator==(const Lab &obj)
         }
     }
 
-void myListLab::insertNode(Lab obj, int stationNum)
+void myListLab::insertNode(Lab obj, int stationNum, int labChoice)
 {
     Listnode *newNode;
     Listnode *nodePtr;
@@ -874,6 +882,7 @@ void myListLab::insertNode(Lab obj, int stationNum)
     newNode->object.setName(obj.getName());
     newNode->object.setTime(obj.gettime());
     newNode->station = stationNum;
+    newNode->lab = labChoice;
 
     if(!head)
     {
@@ -963,16 +972,16 @@ void myListLab::appendNode(Lab& obj)
     }
 }
 
-void login(myListLab arr[], int  capacity)
+void login(myListLab arr[])
 {
-    int labchoice = getlabnum(arr, capacity);
-    int stationchoice = getStationNum(labchoice,arr, capacity);
+    int labchoice = getlabnum(arr);
+    int stationchoice = getStationNum(labchoice,arr);
     int ID = getID();
     string name = getName();
     int time = getTime();
     Lab person(ID, name, time);
-    arr[labchoice-1].insertNode(person, stationchoice);
-    arr[labchoice-1].size++;
+    arr[labchoice-1].insertNode(person, stationchoice,labchoice);
+    ++arr[labchoice-1].size;
 
 
 
@@ -1008,20 +1017,68 @@ void logout(myListLab arr[])
     //search array for user
     for (int i = 0; i < NUMLABS; ++i)
     {
-        nodePtr = arr[NUMLABS].head;
-        if (!head)
+        int count = -1;
+        nodePtr = arr[i].head;
+        while (count != arr[i].size - 1)
         {
-
+            if (ID == nodePtr->object.getUID())
+            {
+                cout << "Thank you for signing out " << nodePtr->object.getName() << endl;
+                arr[i].deleteNode(nodePtr->object);
+                --arr[i].size;
+                return;
+            }
+            nodePtr = nodePtr->next;
+            ++count;
         }
-
     }
-
-
-    }
-    if (counter == 0)
-    {
-        cout << "User not found!!";
-    }
+    cout << "User not found! "<< endl;
+    return;
 }
 
+void searchArray(myListLab arr[])
+{
+        myListLab::Listnode *nodePtr;
+    //for validation
+    bool repeat = true;
+    int ID;
+    //int arrcounter = 0;
+    while(repeat == true)
+    {
+        cout << "Enter your 5 digit ID for the user to find" << endl;
+        //get id to logout
+        cin >> ID;
+        //validation
+        if (cin.fail())
+        {
+            repeat = true;
+            cin.clear();
+            cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
+            cout << "Please enter a valid ID." << endl;
+        }
+        else
+        {
+            repeat = false;
+        }
+    }
+    //search array for user
+    for (int i = 0; i < NUMLABS; ++i)
+    {
+        int count = -1;
+        nodePtr = arr[i].head;
+        while (count != arr[i].size - 1)
+        {
+            if (ID == nodePtr->object.getUID())
+            {
+                cout << "User " << std::setw(5) << std::setfill('0') << nodePtr->object.getUID() << std::setfill(' ') << " is in lab " <<nodePtr->lab << " at station " << nodePtr->station <<  endl;
+                return;
+            }
+            nodePtr = nodePtr->next;
+            ++count;
+        }
+    }
+    cout << "User not found! "<< endl;
+    return;
+
+}
 

@@ -1,4 +1,4 @@
-   /*
+  /*
     COPYRIGHT (C) 2017 Joseph Cochran (jmc361) All rights reserved.
     Project Part A
     Author. Joseph Cochran
@@ -137,7 +137,7 @@ int main()
         else if (choice == 4)
         {
             //Displays lab
-         //   display(ptr);
+            display(universityLabs);
             repeat = false;
         }
         else if (choice == 5)
@@ -320,13 +320,21 @@ int getlabnum(myListLab obj[])
             {
                 cin.clear();
                 cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
+                cout << "Lab is full, please choose another lab." << endl;
                 repeat = true;
             }
             else
             {
                 repeat = false;
             }
-        repeat = false;
+            if (repeat == true)
+            {
+                repeat = true;
+            }
+            else
+            {
+                repeat = false;
+            }
         }
     }
     return labChoice;
@@ -361,7 +369,7 @@ int getStationNum(int labChoice, myListLab obj[])
                 {
                     cin.clear();
                     cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
-                    cout << "Full, please choose another lab." << endl;
+                    cout << "Full, please choose another station." << endl;
                     repeat = true;
 
                 }
@@ -393,7 +401,7 @@ int getStationNum(int labChoice, myListLab obj[])
                 {
                     cin.clear();
                     cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
-                    cout << "Full, please choose another lab." << endl;
+                    cout << "Full, please choose another station." << endl;
                     repeat = true;
                 }
                 else
@@ -424,7 +432,7 @@ int getStationNum(int labChoice, myListLab obj[])
                 {
                     cin.clear();
                     cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
-                    cout << "Full, please choose another lab." << endl;
+                    cout << "Full, please choose another station." << endl;
                     repeat = true;
                 }
                 else
@@ -455,7 +463,7 @@ int getStationNum(int labChoice, myListLab obj[])
                 {
                     cin.clear();
                     cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
-                    cout << "Full, please choose another lab." << endl;
+                    cout << "Full, please choose another station." << endl;
                     repeat = true;
                 }
                 else
@@ -486,7 +494,7 @@ int getStationNum(int labChoice, myListLab obj[])
                 {
                     cin.clear();
                     cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
-                    cout << "Full, please choose another lab." << endl;
+                    cout << "Full, please choose another station." << endl;
                     repeat = true;
                 }
                 else
@@ -517,7 +525,7 @@ int getStationNum(int labChoice, myListLab obj[])
                 {
                     cin.clear();
                     cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
-                    cout << "Full, please choose another lab." << endl;
+                    cout << "Full, please choose another station." << endl;
                     repeat = true;
                 }
                 else
@@ -548,7 +556,7 @@ int getStationNum(int labChoice, myListLab obj[])
                 {
                     cin.clear();
                     cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
-                    cout << "Full, please choose another lab." << endl;
+                    cout << "Full, please choose another station." << endl;
                     repeat = true;
                 }
                 else
@@ -579,7 +587,7 @@ int getStationNum(int labChoice, myListLab obj[])
                 {
                     cin.clear();
                     cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
-                    cout << "Full, please choose another lab." << endl;
+                    cout << "Full, please choose another station." << endl;
                     repeat = true;
                 }
                 else
@@ -703,67 +711,7 @@ void search(Lab * ptr[])
         cout << "User not found!" << endl;
     }
 }
-//Function to display the lab the user wants
-//precond: takes in lab double pointer array to go through and display
-//postcond: returns nothing
-void display(Lab * ptr[])
-{
-    //for validation
-    int counter = 0;
-    int labN;
-    bool repeat = true;
-    while (repeat == true)
-    {
-        //gets lab to display
-        cout << "Please enter the lab to display: ";
-        cin >> labN;
-        //validation
-        if (cin.fail() || labN < 1 || labN > 8)
-        {
-            cin.clear();
-            cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
-            cout << "Please enter valid lab." << endl;
-            repeat = true;
-        }
-        else
-        {
-            repeat = false;
-        }
-    }
-    //Goes through array and displays lab
-    cout << "LAB STATUS" << endl << "Lab    # " << labN << " for " << UNIVERSITYNAMES[labN-1] << endl << "Computer Stations " << endl;
-    for (int i = 0; i < LABSIZES[labN - 1]; i++)
-    {
-        Lab person = ptr[labN-1][i];
-        // Checks if person is in specific station
-        if (person.getUID() == -1)
-        {
-            if (counter % 5 == 0 && counter != 0)
-            {
-                cout << endl << i + 1 << " : " << "empty  ";
-                counter++;
-            }
-            else
-            {
-                cout << i + 1 << " : empty  ";
-                counter++;
-            }
-        }
-        else
-        {
-            if (counter % 5 == 0 && counter != 0)
-            {
-                cout << endl << i + 1 << " : " << person.getUID() << "  ";
-                counter++;
-            }
-            else
-            {
-                cout << i + 1 << " : " << person.getUID() << "  ";
-                counter++;
-            }
-        }
-    }
-}
+
 //Lab member function for changing persons id
 //precond: takes in int id to change the person id to that.
 //postcond: returns nothing
@@ -858,24 +806,28 @@ myListLab::~myListLab()
         nodePtr = nextNode;
     }
 }
-
+//Operator overloader for ==
+//precond: passes reference to lab object
+//postcond: returns bool for if the obejcts are equivalent
 bool Lab::operator==(const Lab &obj)
+{
+    if (userID == obj.userID)
     {
-        if (userID == obj.userID)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return true;
     }
-
+    else
+    {
+        return false;
+    }
+}
+//class function to insert node to linked list
+//precond:passes the lab, stationNum, and lab choice for the node to be inserted
+//postcond: returns nothing
 void myListLab::insertNode(Lab obj, int stationNum, int labChoice)
 {
     Listnode *newNode;
     Listnode *nodePtr;
-    Listnode *prevNode;
+    Listnode *prevNode = nullptr;
 
     newNode = new Listnode;
     newNode->object.setID(obj.getUID());
@@ -887,14 +839,13 @@ void myListLab::insertNode(Lab obj, int stationNum, int labChoice)
     if(!head)
     {
         head = newNode;
-        prevNode = nullptr;
+        newNode->next = nullptr;
     }
     else
     {
         nodePtr = head;
-        prevNode = nullptr;
 
-        while(nodePtr != nullptr)
+        while(nodePtr && nodePtr->station < stationNum)
         {
             prevNode = nodePtr;
             nodePtr = nodePtr->next;
@@ -912,7 +863,9 @@ void myListLab::insertNode(Lab obj, int stationNum, int labChoice)
         }
     }
 }
-
+//Class function to delete node from list node
+//precond: passes object to delete the node with that object
+//postcond: returns nothing
 void myListLab::deleteNode(Lab obj)
 {
     Listnode *nodePtr;
@@ -933,7 +886,7 @@ void myListLab::deleteNode(Lab obj)
     {
         nodePtr = head;
         // loops through to assign the previous node and node pointer
-        while(nodePtr!=nullptr)
+        while(nodePtr!=nullptr && nodePtr->object.getUID() != obj.getUID())
         {
             previousNode = nodePtr;
             nodePtr = nodePtr->next;
@@ -946,7 +899,7 @@ void myListLab::deleteNode(Lab obj)
         }
     }
 }
-
+//class function
 void myListLab::appendNode(Lab& obj)
 {
     Listnode *node;
@@ -1070,7 +1023,8 @@ void searchArray(myListLab arr[])
         {
             if (ID == nodePtr->object.getUID())
             {
-                cout << "User " << std::setw(5) << std::setfill('0') << nodePtr->object.getUID() << std::setfill(' ') << " is in lab " <<nodePtr->lab << " at station " << nodePtr->station <<  endl;
+                cout << "User " << std::setw(5) << std::setfill('0') << nodePtr->object.getUID() << std::setfill(' ') << ", " << nodePtr->object.getName() << ", is in lab "<<
+                nodePtr->lab << " at computer " << nodePtr->station <<  endl;
                 return;
             }
             nodePtr = nodePtr->next;
@@ -1079,6 +1033,146 @@ void searchArray(myListLab arr[])
     }
     cout << "User not found! "<< endl;
     return;
-
 }
+//Function to display the lab the user wants
+//precond: takes in mylistlab array containing the mylistlab linked lists
+//postcond: returns nothing
+void display(myListLab ary[])
+{
+    //for validation
+    int counter = 0;
+    int count = 0;
+    int labN;
+    bool repeat = true;
+    myListLab::Listnode * nodeptr;
+    while (repeat == true)
+    {
+        //gets lab to display
+        cout << "Please enter the lab to display: ";
+        cin >> labN;
+        //validation
+        if (cin.fail() || labN < 1 || labN > 8)
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
+            cout << "Please enter valid lab." << endl;
+            repeat = true;
+        }
+        else
+        {
+            repeat = false;
+        }
+    }
+    //Goes through array and displays lab
+    int size = ary[labN-1].size;
+    cout << "LAB STATUS" << endl << "Lab    # " << labN << " for " << UNIVERSITYNAMES[labN-1] << endl << "Computer Stations " << endl;
+    if (!ary[labN-1].head)
+    {
+        for (int i = 0; i < LABSIZES[labN-1]; ++i)
+        {
+            if (counter % 5 == 0 && counter != 0)
+            {
+                cout << endl << i + 1 << " : " << "empty  ";
+                counter++;
+            }
+            else
+            {
+                cout << i + 1 << " : empty  ";
+                counter++;
+            }
+        }
+    }
+    else
+    {
+        nodeptr = ary[labN-1].head;
+        for (int i = 0; i < LABSIZES[labN-1]; ++i)
+        {
+            if (count == ary[labN-1].size)
+            {
+                while(counter < LABSIZES[labN-1])
+                {
+                    if (counter % 5 == 0 && counter != 0)
+                    {
+                        cout << endl << counter + 1 << " : " << "empty  ";
+                        counter++;
+                    }
+                    else
+                    {
+                        cout << counter + 1 << " : empty  ";
+                        counter++;
+                    }
+                }
+                break;
+            }
+            if (counter == 18)
+            {
+                if (nodeptr->object.getUID() == -1)
+                {
+                    if (counter % 5 == 0 && counter != 0)
+                    {
+                        cout << endl << i + 1 << " : " << "empty  ";
+                        ++counter;
+                        break;
+                    }
+                    else
+                    {
+                        cout << i + 1 << " : " << "empty  ";
+                        ++counter;
+                        break;
+                    }
 
+                }
+                else
+                {
+                    if (counter % 5 == 0 && counter != 0)
+                    {
+                        cout << endl << i + 1 << " : " << std::setw(5) << std::setfill('0') << nodeptr->object.getUID() << std::setfill(' ') << "  ";
+                        ++counter;
+                        break;
+                    }
+                    else
+                    {
+                        cout << i + 1 << " : " << std::setw(5) << std::setfill('0') << nodeptr->object.getUID() << std::setfill(' ') << "  ";
+                        ++counter;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                if (nodeptr->station != i+1)
+                {
+                    if (counter % 5 == 0 && counter != 0)
+                    {
+                        cout << endl << i + 1 << " : " << "empty  ";
+                        ++counter;
+                    }
+                    else
+                    {
+                        cout << i + 1 << " : " << "empty  ";
+                        ++counter;
+                    }
+
+                }
+                else
+                {
+                    if (counter % 5 == 0 && counter != 0)
+                    {
+                        cout << endl << i + 1 << " : " << std::setw(5) << std::setfill('0') << nodeptr->object.getUID() << std::setfill(' ') << "  ";
+                        ++counter;
+                        ++count;
+                            nodeptr = nodeptr->next;
+                    }
+                    else
+                    {
+                        cout << i + 1 << " : " << std::setw(5) << std::setfill('0') << nodeptr->object.getUID() << std::setfill(' ') << "  ";
+                        ++counter;
+                        ++count;
+                            nodeptr = nodeptr->next;
+                    }
+                }
+
+            }
+    }
+}
+}

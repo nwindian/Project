@@ -4,7 +4,8 @@
     Author. Joseph Cochran
             jmc361@zips.uakron.edu
     Version 1.01.07.09.2017
-    Purpose: The purpose of this part of the project is to make sure that you know how to write a program that declare and use classes and objects, and extends the practice into the use of arrays of objects.
+    Purpose: Purpose of this part of the project is to make sure that you know how to write a program
+            that will leverage linked lists, and leverages file usage and file operations as well
 */
 #include <iostream>
 #include <iomanip>
@@ -48,7 +49,6 @@ public:
     myListLab(){
         head = nullptr;
         size = 0;
-        //Listnode::next = nullptr;
     }
     ~myListLab();
     void insertNode(Lab, int, int);
@@ -56,10 +56,10 @@ public:
     void appendNode(Lab&);
     friend void login(myListLab array[]);
     friend void display(myListLab array[]);
-    //void display(myLab* arr[]);
     friend void logout(myListLab array[]);
     friend void searchArray(myListLab array[]);
     friend void recover(myListLab array[]);
+    //Node for linked list
     struct Listnode
     {
         Lab object;
@@ -81,15 +81,9 @@ int getlabnum(myListLab [], int);
 int getStationNum(int, myListLab []);
 string getName();
 int getTime();
-void putInArray (Lab **, Lab &, int, int);
-void search(Lab **);
-void display(Lab **);
-//void logout(Lab **);
 int getID();
-Lab startup(Lab **);
 int choicee();
 void universities();
-myListLab *createArrayofListLabs();
 //Const variables
 const int NUMLABS = 8;
 const int LABSIZES[NUMLABS] = {19, 15, 24, 33, 61, 17, 55,37};
@@ -97,15 +91,9 @@ const std::string UNIVERSITYNAMES[NUMLABS] = {"The University of Michigan", "The
 //Main function
 int main()
 {
-    // Create validation and jagged array/menu, then run through program loop.
     universities();
     bool repeat = false;
-//
     myListLab universityLabs[NUMLABS];
-    for (int i = 0; i < NUMLABS; ++i)
-    {
-       // universityLabs[i].head = new myListLab::Listnode;
-    }
     int labChoice;
     int capacity = 0;
     int stationN;
@@ -124,15 +112,11 @@ int main()
         else if (choice == 2)
         {
             logout(universityLabs);
-            //Logs out user
-           // logout(ptr);
             repeat = false;
         }
         else if (choice == 3)
         {
             searchArray(universityLabs);
-            //Searchs for user
-           // search(ptr);
             repeat = false;
         }
         else if (choice == 4)
@@ -176,7 +160,6 @@ Lab::Lab(int id, string namee, int timee)
     name = namee;
     time = timee;
 }
-
 //Menu for the program
 //precond: Takes in nothing, just prints menu
 //postcond: returns nothing
@@ -233,7 +216,7 @@ bool CheckStation(myListLab ary[], int labChoice, int Station)
     {
         return false;
     }
-
+    //goes through linked list to get a match
     while (count != ary[labChoice-1].size -1)
     {
         if (nodePtr->station == Station)
@@ -345,7 +328,6 @@ int getStationNum(int labChoice, myListLab obj[])
                     cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
                     cout << "Full, please choose another station." << endl;
                     repeat = true;
-
                 }
                 else
                 {
@@ -630,7 +612,6 @@ int getTime()
 //postcond:returns person object id
 int Lab::getUID()
 {
-
     return userID;
 }
 
@@ -638,54 +619,6 @@ int Lab::gettime()
 {
     return time;
 }
-//Function to search for user
-//precond: Takes in Lab double pointer array to search through
-//postcond: returns nothing
-void search(Lab * ptr[])
-{
-    //for validation
-    bool repeat = true;
-    int counter = 0;
-    int ID;
-    while(repeat == true)
-    {
-        cout << "Enter the 5 digit ID number of the user to find" << endl;
-        //gets id
-        cin >> ID;
-        //validation
-        if (cin.fail())
-        {
-            repeat = true;
-            cin.clear();
-            cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
-            cout << "Please enter a number." << endl;
-        }
-        else
-        {
-            repeat = false;
-        }
-    }
-    //searches through array
-    for (int i = 0; i < NUMLABS; i++)
-    {
-        for (int j = 0; j < LABSIZES[i]; j++)
-        {
-            Lab person = ptr[i][j];
-            //if found, prints out where user is
-            if (person.getUID() == ID)
-            {
-                ++counter;
-                cout << "User " << ID << " is in lab " << i + 1 << " at computer " << j + 1 << endl;
-            }
-        }
-    }
-    //if user is not found
-    if (counter == 0)
-    {
-        cout << "User not found!" << endl;
-    }
-}
-
 //Lab member function for changing persons id
 //precond: takes in int id to change the person id to that.
 //postcond: returns nothing
@@ -760,15 +693,15 @@ void universities()
         cout << "lab # " << i << " " << UNIVERSITYNAMES[i-1] << endl;
     }
 }
-
+//destructor for mylistlab
+//precond: takes in nothing
+//postcond: returns nothing, just destroys node.
 myListLab::~myListLab()
 {
     Listnode *nodePtr;   // To traverse the list
     Listnode *nextNode;  // To point to the next node
-
     // Position nodePtr at the head of the list.
     nodePtr = head;
-
     // While nodePtr is not at the end of the list...
     while (nodePtr != nullptr)
     {
@@ -802,14 +735,14 @@ void myListLab::insertNode(Lab obj, int stationNum, int labChoice)
     Listnode *newNode;
     Listnode *nodePtr;
     Listnode *prevNode = nullptr;
-
+    //assigns values
     newNode = new Listnode;
     newNode->object.setID(obj.getUID());
     newNode->object.setName(obj.getName());
     newNode->object.setTime(obj.gettime());
     newNode->station = stationNum;
     newNode->lab = labChoice;
-
+    //check if head is there
     if(!head)
     {
         head = newNode;
@@ -817,8 +750,8 @@ void myListLab::insertNode(Lab obj, int stationNum, int labChoice)
     }
     else
     {
+        //assign nodePtr and go through to insert node
         nodePtr = head;
-
         while(nodePtr && nodePtr->station < stationNum)
         {
             prevNode = nodePtr;
@@ -873,32 +806,9 @@ void myListLab::deleteNode(Lab obj)
         }
     }
 }
-//class function
-void myListLab::appendNode(Lab& obj)
-{
-    Listnode *node;
-    Listnode *nodeptr;
-    node = new Listnode;
-    //Assign values for append
-    node->object = obj;
-    node->next = nullptr;
-
-    if(!head)
-    {
-        //Assign the head value to the new node
-        head = node;
-    }
-    else
-    {
-        nodeptr = head;
-        while(nodeptr->next)
-        {
-            nodeptr = nodeptr->next;
-        }
-        nodeptr->next = node;
-    }
-}
-
+//function to print the current time
+//precond: takes in nothing, just prints current time
+//postcond: returns cstring that holds time
 char* timeStamp()
 {
     // current date/time based on current system
@@ -908,13 +818,15 @@ char* timeStamp()
     // we want a way to limit the size to be just 20 in length
     Ptime[20] = '\0'; // this effectively truncates the c-string
     return Ptime;
-
 }
-
+//Function that logs info into a file
+//precond: Takes in a Lab object and bool to see if its input or output
+//postcond: returns nothing
 void logFile(Lab obj, bool log)
 {
     std::ofstream logFile;
     logFile.open("logf.txt", std::ofstream::app);
+    //checks if file exists
     if (!logFile)
     {
         logFile << std::setw(5) << std::left << "  Name" << std::right
@@ -922,15 +834,18 @@ void logFile(Lab obj, bool log)
     }
     if (log)
     {
-        logFile << obj.getUID() << " I " << obj.getName() << " " << obj.gettime() << " " << timeStamp() << endl;
+        logFile << std::setw(5) << std::setfill('0') << obj.getUID() << std::setfill(' ') << " I " << obj.getName() << " " << obj.gettime() << " " << timeStamp() << endl;
     }
     else
     {
-        logFile << obj.getUID() << " O " << obj.getName() << " " << obj.gettime() << " " << timeStamp() << endl;
+        logFile << std::setw(5) << std::setfill('0') << obj.getUID() << std::setfill(' ') << " O " << obj.getName() << " " << obj.gettime() << " " << timeStamp() << endl;
     }
     logFile.close();
 
 }
+//friend function that logs a user in to the linked list. Also logs them into the file;
+//precond: Takes in nothing, just logs in user
+//postcond: returns nothing
 void login(myListLab arr[])
 {
     bool login = true;
@@ -943,13 +858,10 @@ void login(myListLab arr[])
     arr[labchoice-1].insertNode(person, stationchoice,labchoice);
     ++arr[labchoice-1].size;
     logFile(person, login);
-
-
-
-
 }
-
-
+//friend function that logs out the user and removes from linked list
+//precond: Takes in myListLab Array to search through
+//postcond: returns nothing
 void logout(myListLab arr[])
 {
     bool logoutt = false;
@@ -998,14 +910,15 @@ void logout(myListLab arr[])
     cout << "User not found! "<< endl;
     return;
 }
-
+//function to search through linked list and print the user if found
+//precond: Takes in myListLab to help search through
+//postcond: returns nothing.
 void searchArray(myListLab arr[])
 {
-        myListLab::Listnode *nodePtr;
+    myListLab::Listnode *nodePtr;
     //for validation
     bool repeat = true;
     int ID;
-    //int arrcounter = 0;
     while(repeat == true)
     {
         cout << "Enter your 5 digit ID for the user to find" << endl;
@@ -1076,6 +989,7 @@ void display(myListLab ary[])
     //Goes through array and displays lab
     int size = ary[labN-1].size;
     cout << "LAB STATUS" << endl << "Lab    # " << labN << " for " << UNIVERSITYNAMES[labN-1] << endl << "Computer Stations " << endl;
+    //checks if head
     if (!ary[labN-1].head)
     {
         for (int i = 0; i < LABSIZES[labN-1]; ++i)
@@ -1097,6 +1011,7 @@ void display(myListLab ary[])
         nodeptr = ary[labN-1].head;
         for (int i = 0; i < LABSIZES[labN-1]; ++i)
         {
+            //checks if the end of the linked list
             if (count == ary[labN-1].size)
             {
                 while(counter < LABSIZES[labN-1])
@@ -1114,8 +1029,10 @@ void display(myListLab ary[])
                 }
                 break;
             }
-            if (counter == 18)
+            //checks if it is the end of the number of stations
+            if (counter == LABSIZES[labN-1]-1)
             {
+                //checks if empty or not
                 if (nodeptr->object.getUID() == -1)
                 {
                     if (counter % 5 == 0 && counter != 0)
@@ -1150,6 +1067,7 @@ void display(myListLab ary[])
             }
             else
             {
+                //checks if it is empty
                 if (nodeptr->station != i+1)
                 {
                     if (counter % 5 == 0 && counter != 0)
@@ -1166,6 +1084,7 @@ void display(myListLab ary[])
                 }
                 else
                 {
+                    //checks if 5 users are listed on the line
                     if (counter % 5 == 0 && counter != 0)
                     {
                         cout << endl << i + 1 << " : " << std::setw(5) << std::setfill('0') << nodeptr->object.getUID() << std::setfill(' ') << "  ";
@@ -1181,29 +1100,32 @@ void display(myListLab ary[])
                             nodeptr = nodeptr->next;
                     }
                 }
-
             }
+        }
     }
 }
-}
-
+//function to recover a person from the file and log them in
+//precond: Takes in myListLab array to help search through
+//postCond: returns nothing
 void recover(myListLab ary[])
 {
+    //All variables used for counting and files
     int count = 0;
-    int labCount = 0;
     std::ifstream log;
     log.open("logf.txt");
     int ID;
     int labN;
     bool repeat = true;
+    string timeS;
     string IorO;
     int fileID;
     string name;
     int time;
     bool found = true;
+    bool repWhile = true;
+    //create a nodePtr for linked list
     myListLab::Listnode *nodeptr;
-    myListLab::Listnode *tempNode;
-
+    //validation
     while (repeat == true)
     {
         cout << "Please enter an ID to recover: " << endl;
@@ -1224,7 +1146,6 @@ void recover(myListLab ary[])
     repeat = true;
     while (repeat == true)
     {
-        //gets lab to display
         cout << "Please enter the lab: ";
         cin >> labN;
         //validation
@@ -1240,9 +1161,11 @@ void recover(myListLab ary[])
             repeat = false;
         }
     }
+    //Search through file to check if user is there
     while(log >> fileID)
     {
         log >> IorO >> name >> time;
+        log.ignore(numeric_limits<std::streamsize>::max(), '\n');
         if (fileID == ID)
         {
             found = true;
@@ -1260,17 +1183,23 @@ void recover(myListLab ary[])
     }
     else
     {
+        //This is to check what the next open station is.
         int openStat = 1;
         Lab person(fileID,name,time);
         nodeptr = new myListLab::Listnode;
         nodeptr = ary[labN-1].head;
         while(nodeptr && count < ary[labN-1].size)
         {
+            if (repWhile == false)
+            {
+                break;
+            }
             for (int i = 0; i < LABSIZES[labN-1]; ++i)
             {
                 if (count == ary[labN-1].size)
                 {
                     openStat = i+1;
+                    repWhile = false;
                     break;
                 }
                 else if (nodeptr->station == i + 1)
@@ -1281,13 +1210,14 @@ void recover(myListLab ary[])
                 else
                 {
                     openStat = i+1;
+                    repWhile = false;
                     break;
                 }
             }
         }
+        //log the user in
         ary[labN-1].insertNode(person,openStat,labN);
         cout << "Thanks for recovering!" << endl;
-        cout << ary[labN-1].head->object.getName();
         ++ary[labN-1].size;
         return;
     }

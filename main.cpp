@@ -1,11 +1,12 @@
  /*
-    COPYRIGHT (C) 2017 Joseph Cochran (jmc361) All rights reserved.
-    Project Part A
+    COPYRIGHT (C) 2018 Joseph Cochran (jmc361) All rights reserved.
+    Project Part C
     Author. Joseph Cochran
             jmc361@zips.uakron.edu
     Version 1.01.07.09.2017
     Purpose: Purpose of this part of the project is to make sure that you know how to write a program
-            that will leverage linked lists, and leverages file usage and file operations as well
+            that declares and uses a queue, makes use of a map, and performs some error handling.
+            EXCEPTION HANDLING EXAMPLES: in display and searchArray functions
 */
 #include <iostream>
 #include <iomanip>
@@ -13,6 +14,8 @@
 #include <ctime>
 #include <limits>
 #include <fstream>
+#include <queue>
+#include <map>
 
 using std::endl;
 using std::cout;
@@ -32,7 +35,13 @@ public:
     //Default constructor
     Lab();
     //Constructor
-    Lab(int id,string namee, int timee);
+    Lab(int id,string namee, int timee, int,int);
+    Lab(int idd , string nameee,int tt)
+    {
+        userID = idd;
+        name = nameee;
+        time = tt;
+    }
     //Setters and Getters and other functions
     void setID(int IDD);
     int getUID();
@@ -41,6 +50,8 @@ public:
     int gettime();
     void setTime(int timee);
     bool operator==(const Lab&);
+    int labOf;
+    int stationOf;
 };
 //Class for my list lab
 class myListLab
@@ -50,6 +61,8 @@ public:
         head = nullptr;
         size = 0;
     }
+    static std::queue<Lab*> myQueue;
+    static std::map<int, Lab*> myMap;
     ~myListLab();
     void insertNode(Lab, int, int);
     void deleteNode(Lab);
@@ -72,6 +85,8 @@ public:
     int size;
 };
 // Nonmember functions
+void queueUp(Lab*);
+Lab * queueOut(myListLab array[],int);
 char *timeStamp();
 bool checkLab(myListLab [], int, int );
 bool CheckStation(myListLab [], int , int );
@@ -88,17 +103,16 @@ void universities();
 const int NUMLABS = 8;
 const int LABSIZES[NUMLABS] = {19, 15, 24, 33, 61, 17, 55,37};
 const std::string UNIVERSITYNAMES[NUMLABS] = {"The University of Michigan", "The University of Pittsburgh", "Stanford University", "Arizona State University", "North Texas State University", "The University of Alabama, Huntsville", "Princeton University", "Duquesne University"};
+static std::queue<Lab*> myQueue;
+static std::map<int, Lab*> myMap;
 //Main function
 int main()
 {
     universities();
     bool repeat = false;
     myListLab universityLabs[NUMLABS];
-    int labChoice;
     int capacity = 0;
-    int stationN;
     string name;
-    int time;
     while(repeat == false)
     {
         //Get choice
@@ -150,15 +164,19 @@ Lab::Lab()
     userID = -1;
     name = " ";
     time = 0;
+    labOf = -1;
+    stationOf = -1;
 }
 //Overloaded constructor for lab
 //precond: Takes in data for class
 //postcond: returns nothing
-Lab::Lab(int id, string namee, int timee)
+Lab::Lab(int id, string namee, int timee, int labb, int station)
 {
     userID = id;
     name = namee;
     time = timee;
+    labOf = labb;
+    stationOf = station;
 }
 //Menu for the program
 //precond: Takes in nothing, just prints menu
@@ -206,7 +224,6 @@ bool checkLab(myListLab ary[], int labChoice)
 bool CheckStation(myListLab ary[], int labChoice, int Station)
 {
     int count = -1;
-    int ID;
     myListLab::Listnode *nodePtr;
     myListLab::Listnode *tailNode;
     nodePtr = ary[labChoice - 1].head;
@@ -271,27 +288,7 @@ int getlabnum(myListLab obj[])
         }
         else
         {
-            //Checks if lab is full
-            bool ifFull = checkLab(obj, labChoice);
-            if (ifFull == true)
-            {
-                cin.clear();
-                cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
-                cout << "Lab is full, please choose another lab." << endl;
-                repeat = true;
-            }
-            else
-            {
-                repeat = false;
-            }
-            if (repeat == true)
-            {
-                repeat = true;
-            }
-            else
-            {
-                repeat = false;
-            }
+              repeat = false;
         }
     }
     return labChoice;
@@ -742,6 +739,8 @@ void myListLab::insertNode(Lab obj, int stationNum, int labChoice)
     newNode->object.setTime(obj.gettime());
     newNode->station = stationNum;
     newNode->lab = labChoice;
+    newNode->object.labOf = newNode->lab;
+    newNode->object.stationOf = newNode->station;
     //check if head is there
     if(!head)
     {
@@ -850,20 +849,44 @@ void login(myListLab arr[])
 {
     bool login = true;
     int labchoice = getlabnum(arr);
+    if (checkLab(arr,labchoice))
+    {
+        Lab * person = new Lab;
+        cout << "You'll be placed in the next available station." << endl;
+        int ID = getID();
+        string name = getName();
+        int time = getTime();
+        person->setID(ID);
+        person->setName(name);
+        person->setTime(time);
+        person->labOf = labchoice;
+        myQueue.push(person);
+        return;
+    }
+    Lab * newPerson = new Lab;
     int stationchoice = getStationNum(labchoice,arr);
     int ID = getID();
     string name = getName();
     int time = getTime();
-    Lab person(ID, name, time);
+    Lab person(ID, name, time,labchoice, stationchoice);
+    //create pointer to object
+    *newPerson = person;
     arr[labchoice-1].insertNode(person, stationchoice,labchoice);
     ++arr[labchoice-1].size;
     logFile(person, login);
+    //insert into map
+    myMap[ID] = newPerson;
 }
 //friend function that logs out the user and removes from linked list
 //precond: Takes in myListLab Array to search through
 //postcond: returns nothing
 void logout(myListLab arr[])
 {
+    int  currLabSize;
+    int station;
+    int stationforQ;
+    int labforQ;
+    bool isfound = false;
     bool logoutt = false;
     myListLab::Listnode *nodePtr;
     //for validation
@@ -897,62 +920,97 @@ void logout(myListLab arr[])
         {
             if (ID == nodePtr->object.getUID())
             {
+                isfound = true;
+                stationforQ = nodePtr->station;
+                labforQ = nodePtr->lab;
                 logFile(nodePtr->object,logoutt);
                 cout << "Thank you for signing out " << nodePtr->object.getName() << endl;
+                station = nodePtr->station;
                 arr[i].deleteNode(nodePtr->object);
                 --arr[i].size;
-                return;
+                currLabSize = i;
+                break;
+                //return;
             }
             nodePtr = nodePtr->next;
             ++count;
         }
     }
-    cout << "User not found! "<< endl;
-    return;
+    if (isfound == false)
+    {
+        cout << "User not found! "<< endl;
+        return;
+    }
+    if (arr[currLabSize].size == LABSIZES[currLabSize] - 1)
+    {
+        //checks queue if queue is not empty
+        if (!myQueue.empty())
+        {
+            Lab * newlab = queueOut(arr, currLabSize);
+            if (newlab != nullptr)
+            {
+                newlab->stationOf = station;
+                arr[currLabSize].insertNode(*newlab,station,currLabSize);
+                myMap[newlab->getUID()] = newlab;
+                logFile(*newlab,true);
+                cout << "User has been logged into station from queue." << endl;
+                ++arr[currLabSize].size;
+            }
+        }
+    }
 }
 //function to search through linked list and print the user if found
 //precond: Takes in myListLab to help search through
 //postcond: returns nothing.
 void searchArray(myListLab arr[])
 {
-    myListLab::Listnode *nodePtr;
+    std::map<int, Lab*>::iterator it = myMap.begin();
     //for validation
     bool repeat = true;
     int ID;
+    std::string err;
     while(repeat == true)
     {
-        cout << "Enter your 5 digit ID for the user to find" << endl;
-        //get id to logout
-        cin >> ID;
-        //validation
-        if (cin.fail())
+        //EXCEPTION HANDLING EXAMPLE
+        try
+        {
+            cout << "Enter your 5 digit ID for the user to find" << endl;
+            //get id to logout
+            cin >> ID;
+            //validation
+            if (cin.fail())
+            {
+                err = "Error: Not Valid!";
+                throw err;
+            }
+            else
+            {
+                repeat = false;
+            }
+        }
+        //CATCH BLOCK FOR TRY BLOCK
+        catch (std::string str)
         {
             repeat = true;
             cin.clear();
             cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
-            cout << "Please enter a valid ID." << endl;
-        }
-        else
-        {
-            repeat = false;
+            std::cerr << str << endl;
         }
     }
     //search array for user
-    for (int i = 0; i < NUMLABS; ++i)
+    for (it = myMap.begin(); it != myMap.end(); ++it)
     {
         int count = -1;
-        nodePtr = arr[i].head;
-        while (count != arr[i].size - 1)
+        if (ID == it->first)
         {
-            if (ID == nodePtr->object.getUID())
-            {
-                cout << "User " << std::setw(5) << std::setfill('0') << nodePtr->object.getUID() << std::setfill(' ') << ", " << nodePtr->object.getName() << ", is in lab "<<
-                nodePtr->lab << " at computer " << nodePtr->station <<  endl;
-                return;
-            }
-            nodePtr = nodePtr->next;
-            ++count;
+            Lab * newLab = new Lab;
+            newLab = it->second;
+
+            cout << "User " << std::setw(5) << std::setfill('0') << it->first << std::setfill(' ') << ", " << newLab->getName() << ", is in lab "<<
+            newLab->labOf << " at computer " << newLab->stationOf <<  endl;
+            return;
         }
+        ++count;
     }
     cout << "User not found! "<< endl;
     return;
@@ -968,26 +1026,35 @@ void display(myListLab ary[])
     int labN;
     bool repeat = true;
     myListLab::Listnode * nodeptr;
+    std::string err;
     while (repeat == true)
     {
-        //gets lab to display
-        cout << "Please enter the lab to display: ";
-        cin >> labN;
-        //validation
-        if (cin.fail() || labN < 1 || labN > 8)
+        //EXCEPTION HANDLING EXAMPLE
+        try
         {
+            cout << "Please enter the lab to display: ";
+            cin >> labN;
+        //validation
+            if (cin.fail() || labN < 1 || labN > 8)
+            {
+                err = "Error: Not valid input!";
+                throw err;
+            }
+            else
+            {
+                repeat = false;
+            }
+        }
+        //CATCH FOR TRY BLOCK
+        catch(std::string err)
+        {
+            repeat = true;
             cin.clear();
             cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
-            cout << "Please enter valid lab." << endl;
-            repeat = true;
-        }
-        else
-        {
-            repeat = false;
+            std::cerr << err << endl;
         }
     }
     //Goes through array and displays lab
-    int size = ary[labN-1].size;
     cout << "LAB STATUS" << endl << "Lab    # " << labN << " for " << UNIVERSITYNAMES[labN-1] << endl << "Computer Stations " << endl;
     //checks if head
     if (!ary[labN-1].head)
@@ -1221,4 +1288,52 @@ void recover(myListLab ary[])
         ++ary[labN-1].size;
         return;
     }
+}
+//Function to add lab to queue
+//precond: Takes in lab pointer to push
+//postcond: returns nothing
+void queueUp(Lab * lab)
+{
+    myQueue.push(lab);
+}
+//This function goes through the queue, puts the labs (in the queue) that are not the one I am searching for into a temp queue. returns the correct lab from queue.
+//precond: Takes in array with linked list and a lab that shows the lab that the person is from
+//postcond: returns a lab pointer which is the one I am searching for to insert into linked list.
+Lab* queueOut(myListLab arr[], int lab)
+{
+    //set default value to front of queue
+    Lab* person = myQueue.front();
+    Lab* user = nullptr;
+    myQueue.pop();
+    //Creates a temporary Queue
+    std::queue<Lab*> Q;
+    //put labs in temp Q
+    while (!myQueue.empty() && person->labOf-1 != lab)
+    {
+        //Put in temp Q
+        Q.emplace(person);
+        //cycles through
+        person = myQueue.front();
+        //pop out the element in the queue
+        myQueue.pop();
+    }
+    //if user is correct
+    if (person->labOf-1 == lab)
+    {
+        //user will equal the temporary lab object
+        user = person;
+    }
+    else
+    {
+        //puts into temporary queue
+        Q.emplace(person);
+    }
+    while (!myQueue.empty())
+    {
+        person = myQueue.front();
+        myQueue.pop();
+        Q.emplace(person);
+    }
+    myQueue.swap(Q);
+    return user;
 }
